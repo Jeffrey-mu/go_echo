@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "form-data": "^4.0.0",
+    "formdata-node": "^4.3.3",
     "node-fetch": "^3.2.9"
   }
 }
