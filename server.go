@@ -1,26 +1,36 @@
 package main
 
 import (
+	"database/sql"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 )
 
 var (
-	newFile *os.File
-	err     error
+	err error
 )
 
 func main() {
-	newFile, err = os.Create("test.txt")
+	db, err := sql.Open("mysql", "admin:mc1009jf1018.@21729(bj-cynosdbmysql-grp-0o0dqcfy.sql.tencentcdb.com)/admin")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	log.Println(newFile)
-	newFile.Close()
+	// See "Important settings" section.
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+	Db := db
+	data, err := Db.Query("SELECT * FROM user where id = 1")
+	// row, _ := data.Columns()
+	// println(row[0])
+	println(data.Columns())
+	Db.Close()
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -28,6 +38,7 @@ func main() {
 	e.GET("/users/:id", getUser)
 	e.GET("/show", show)
 	e.POST("/save", save)
+	e.Static("/static", "static")
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
